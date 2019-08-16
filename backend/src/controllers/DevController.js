@@ -24,7 +24,10 @@ module.exports = {
         const userExists = await Dev.findOne({user: username})
 
         if(userExists)
-            return res.json(userExists)
+            return res.json({
+                msg: 'User exists',
+                user: userExists
+            })
 
         const response = await axios.get(`https://api.github.com/users/${username}`)
 
@@ -37,7 +40,10 @@ module.exports = {
             avatar
         })
 
-        return res.json(dev)
+        return res.json({
+            msg: 'User created',    
+            dev
+        })
     }
 
 }

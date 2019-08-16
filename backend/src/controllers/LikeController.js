@@ -5,16 +5,22 @@ module.exports = {
 
         const { user } = req.headers;
         const { devId } = req.params
-        const loggedDev = await Dev.findById(user, (user, err) => {
+        const loggedDev = await Dev.findById(user, (err, user) => {
             if(err) {
-                return res.status(400).json({error: 'Dev does not exist'})
+                return res.status(400).json({
+                    msg: 'Something went wrong',
+                    err: err,
+                })
             }
             return user
         })
 
-        const targetDev = await Dev.findById(devId, (targetDev, err) => {
+        const targetDev = await Dev.findById(devId, (err, targetDev) => {
             if(err) {
-                return res.status(400).json({error: 'Dev does not exist'})
+                return res.status(400).json({
+                    msg: 'Something went wrong',
+                    err: err
+                })
             }
 
             return targetDev
@@ -30,6 +36,9 @@ module.exports = {
     
         await loggedDev.save()
     
-        return res.json(loggedDev)
+        return res.json({
+            msg: `Successfully liked ${targetDev.name}`,
+            user: loggedDev
+        })
     }
 }
