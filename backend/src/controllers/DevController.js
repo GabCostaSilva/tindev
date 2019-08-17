@@ -9,41 +9,45 @@ module.exports = {
 
         const users = await Dev.find({
             $and: [
-                {_id: { $ne: user }},
-                {_id: { $nin: loggedDev.likes }},
-                {_id: { $nin: loggedDev.dislikes }}
+                { _id: { $ne: user } },
+                { _id: { $nin: loggedDev.likes } },
+                { _id: { $nin: loggedDev.dislikes } }
             ]
         })
 
-       return res.json(users)
+        return res.json(users)
     },
 
     async store(req, res) {
-        const { username } = req.body
+        try {
+            const { username } = req.body
 
-        const userExists = await Dev.findOne({user: username})
+            const userExists = await Dev.findOne({ user: username })
+            if (userExists)
+                return res.json({
+                    msg: 'User exists',
+                    user: userExists
+                })
 
-        if(userExists)
-            return res.json({
-                msg: 'User exists',
-                user: userExists
+            const response = await axios.get(`https://api.github.com/users/${username}`)
+
+            const { name, bio, avatar_url: avatar } = response.data
+
+            const dev = await Dev.create({
+                name,
+                user: username,
+                bio,
+                avatar
             })
 
-        const response = await axios.get(`https://api.github.com/users/${username}`)
-
-        const { name, bio, avatar_url: avatar } = response.data
-
-       const dev = await Dev.create({
-            name,
-            user: username,
-            bio,
-            avatar
-        })
-
-        return res.json({
-            msg: 'User created',    
-            dev
-        })
+            return res.json({
+                msg: 'User created',
+                dev
+            })
+        }  catch(e) {
+            return res.json({
+                error: e.message
+            })
+        }       
     }
-
 }

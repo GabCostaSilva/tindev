@@ -26,14 +26,15 @@ export default function Main({ match }) {
     }, [match.params.id])
 
     async function handleLike(id) {
-        await api.post(`/devs/${id}/likes`, null, {
+        console.log(id)
+        await api.post(`/devs/${id}/like`, null, {
             headers: { user: match.params.id }
         })
         setUsers(users.filter(user => user._id !== id))
     }
 
     async function handleDislike(id) {
-        await api.post(`/devs/${id}/dislikes`, null, {
+        await api.post(`/devs/${id}/dislike`, null, {
             headers: { user: match.params.id }
         })
 
@@ -45,7 +46,7 @@ export default function Main({ match }) {
             <Link to="/">
                 <img src={logo} alt="tindev logo"/>
             </Link>
-            { users.length > 0 ? (
+            {users.length > 0 ? (
                 <ul>
                     {users.map(user => (
                         <li key={user._id}>
