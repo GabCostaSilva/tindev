@@ -3,7 +3,19 @@ const routes = require('./routes')
 const mongoose = require('mongoose')
 const cors = require('cors')
 
-const server = express()
+const app = express()
+const server = require('http').Server(app)
+const io = require('socket.io')(server)
+
+// bad practice => server must be stateless. solution is to use key-value database
+const connectedUsers = {
+
+}
+/** TODO: stopped at 14:22 */
+io.on('connection', socket => {
+    const { user } = socket.handshake.query
+    connectedUsers[user] = socket.id
+})
 
 mongoose.connect(
     'mongodb://root:password@localhost/admin',
@@ -13,8 +25,8 @@ mongoose.connect(
     }
 )
 
-server.use(cors())
-server.use(express.json())
-server.use(routes)
+app.use(cors())
+app.use(express.json())
+app.use(routes)
 
 server.listen(3333)

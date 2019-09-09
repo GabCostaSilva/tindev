@@ -22,18 +22,18 @@ module.exports = {
         try {
             const { username } = req.body
 
-            const userExists = await Dev.findOne({ user: username })
-            if (userExists)
+            const user = await Dev.findOne({ user: username })
+            
+            if (user)
                 return res.json({
-                    msg: 'User exists',
-                    user: userExists
+                    user
                 })
 
             const response = await axios.get(`https://api.github.com/users/${username}`)
 
             const { name, bio, avatar_url: avatar } = response.data
 
-            const dev = await Dev.create({
+            const createdDev = await Dev.create({
                 name,
                 user: username,
                 bio,
@@ -41,9 +41,9 @@ module.exports = {
             })
 
             return res.json({
-                msg: 'User created',
-                dev
+                createdDev
             })
+
         }  catch(e) {
             return res.json({
                 error: e.message
