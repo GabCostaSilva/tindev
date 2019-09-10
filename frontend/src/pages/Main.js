@@ -2,17 +2,23 @@
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import io from 'socket.io-client'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faSpinner } from '@fortawesome/free-solid-svg-icons'
+
 import api from '../services/api'
 
 import logo from '../assets/logo.svg'
 import like from '../assets/like.svg'
 import dislike from '../assets/dislike.svg'
+import itsamatch from '../assets/itsamatch.png'
+import loading from '../assets/loading.png'
 
 import './Main.css'
 
 export default function Main({ match }) {
     const [users, setUsers] = useState([])
     const [isLoading, setLoading] = useState(true)
+    const [matchDev, setMatchDev] = useState(false)
 
     useEffect(() => {
         async function loadUsers() {
@@ -27,12 +33,15 @@ export default function Main({ match }) {
         loadUsers()
     }, [match.params.id])
 
-    
+
     useEffect(() => {
         const socket = io('http://localhost:3333', {
             query: { user: match.params.id }
         })
 
+        socket.on('match', dev => {
+            setMatchDev(dev)
+        })
     }, [match.params.id])
 
     async function handleLike(id) {
@@ -50,19 +59,16 @@ export default function Main({ match }) {
         setUsers(users.filter(user => user._id !== id))
     }
 
-    if (isLoading) {
-        return (
-            <div className="main-container">
-                Loading...
-            </div>
-        )
-    }
-
     return (
         <div className="main-container">
             <Link to="/">
                 <img src={logo} alt="tindev logo" />
             </Link>
+            {(isLoading &&
+                <div>
+                    <FontAwesomeIcon className="spinner" icon={faSpinner} />
+                </div>
+            )}
             {users.length > 0 ? (
                 <ul>
                     {users.map(user => (
@@ -86,6 +92,17 @@ export default function Main({ match }) {
             ) :
                 <div className="empty">Não há mais devs.</div>
             }
+
+            {matchDev && (
+                <div className="match-container">
+                    <img src={itsamatch} alt="It's a match!" />
+                    <img className="avatar" src={matchDev.avatar} alt="" />
+                    <strong>{matchDev.name}</strong>
+                    <p>{matchDev.bio}</p>
+
+                    <button type="button" onClick={() => setMatchDev(null)}>Fechar</button>
+                </div>
+            )}
         </div>
     )
 }

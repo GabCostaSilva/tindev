@@ -11,9 +11,10 @@ const io = require('socket.io')(server)
 const connectedUsers = {
 
 }
-/** TODO: stopped at 14:22 */
+
 io.on('connection', socket => {
     const { user } = socket.handshake.query
+    
     connectedUsers[user] = socket.id
 })
 
@@ -24,6 +25,13 @@ mongoose.connect(
         dbName: 'tindev'
     }
 )
+
+app.use((req, res, next) => {
+    req.io = io
+    req.connectedUsers = connectedUsers
+
+    return next()
+})
 
 app.use(cors())
 app.use(express.json())
