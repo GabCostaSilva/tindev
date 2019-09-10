@@ -12,6 +12,7 @@ import './Main.css'
 
 export default function Main({ match }) {
     const [users, setUsers] = useState([])
+    const [isLoading, setLoading] = useState(true)
 
     useEffect(() => {
         async function loadUsers() {
@@ -20,21 +21,21 @@ export default function Main({ match }) {
                     user: match.params.id,
                 }
             })
-
             setUsers(response.data)
+            setLoading(false)
         }
-        loadUsers();
+        loadUsers()
     }, [match.params.id])
 
+    
     useEffect(() => {
         const socket = io('http://localhost:3333', {
             query: { user: match.params.id }
         })
-        
+
     }, [match.params.id])
 
     async function handleLike(id) {
-        console.log(id)
         await api.post(`/devs/${id}/like`, null, {
             headers: { user: match.params.id }
         })
@@ -47,6 +48,14 @@ export default function Main({ match }) {
         })
 
         setUsers(users.filter(user => user._id !== id))
+    }
+
+    if (isLoading) {
+        return (
+            <div className="main-container">
+                Loading...
+            </div>
+        )
     }
 
     return (
@@ -74,9 +83,9 @@ export default function Main({ match }) {
                         </li>
                     ))}
                 </ul>
-            ) : (
-                    <div className="empty">Acabou :(</div>
-                )}
+            ) :
+                <div className="empty">Não há mais devs.</div>
+            }
         </div>
     )
 }
